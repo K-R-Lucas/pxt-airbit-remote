@@ -1,5 +1,5 @@
-//% color="#deae10ff" weight=100
-namespace AirbitRemote {
+//% color="#deae10" weight=100
+namespace AirBitRemote {
     interface Controls {
         throttle: number,
         pitch: number,
@@ -7,7 +7,13 @@ namespace AirbitRemote {
         yaw: number
     }
 
-    let controls: Controls;
+    let controls: Controls = {
+        throttle: 0,
+        pitch: 0,
+        roll: 0,
+        yaw: 0
+    };
+
     let estop: boolean = false;
 
     //% block
