@@ -1,99 +1,115 @@
+class State {
+    throttle: number = 0;
+    pitch: number = 0;
+    roll: number = 0;
+    yaw: number = 0;
+    send_arm: boolean = false;
+    send_disarm: boolean = false;
+    send_estop: boolean = false;
+}
+
 //% color="#deae10" weight=100
 namespace AirBitRemote {
-    interface Controls {
-        throttle: number,
-        pitch: number,
-        roll: number,
-        yaw: number
-    }
+    let state: State;
 
-    let controls: Controls = {
-        throttle: 0,
-        pitch: 0,
-        roll: 0,
-        yaw: 0
-    };
-
-    let estop: boolean = false;
-
-    //% block
+    //% block="initialise()"
+    //% group="Setup"
     export function initialise() {
-        controls = {
-            throttle: 0,
-            pitch: 0,
-            roll: 0,
-            yaw: 0
-        }
+        state = new State();
     }
 
-    //% block
-    export function connectToChannel(channel: number) {
+    //% block="setWifiChannel($channel)"
+    //% group="Communication"
+    export function setWifiChannel(channel: number) {
         radio.setGroup(channel);
     }
 
-    //% block
+    //% block="emergencyStop()"
+    //% group="Control"
     export function emergencyStop() {
         radio.sendString("e");
-        estop = true;
+        state.send_estop = true;
     }
 
-    //% block
+    //% block="setThrottle($amount)"
+    //% group="Control"
     export function setThrottle(amount: number) {
-        controls.throttle = Math.min(Math.max(amount, 0), 100);
+        state.throttle = Math.min(Math.max(amount, 0), 100);
     }
 
-    //% block
+    //% block="setPitch($amount)"
+    //% group="Control"
     export function setPitch(amount: number) {
-        controls.pitch = Math.min(Math.max(amount, -45), 45);
+        state.pitch = Math.min(Math.max(amount, -45), 45);
     }
 
-    //% block
+    //% block="setRoll($amount)"
+    //% group="Control"
     export function setRoll(amount: number) {
-        controls.roll = Math.min(Math.max(amount, -45), 45);
+        state.roll = Math.min(Math.max(amount, -45), 45);
     }
 
-    //% block
+    //% block="setYaw($amount)"
+    //% group="Control"
     export function setYaw(amount: number) {
-        controls.yaw = amount;
+        state.yaw = amount;
     }
 
-    //% block
+    //% block="changeThrottle($amount)"
     export function changeThrottle(amount: number) {
-        controls.throttle = Math.min(Math.max(controls.throttle + amount, 0), 100);
+        state.throttle = Math.min(Math.max(state.throttle + amount, 0), 100);
     }
 
-    //% block
+    //% block="changePitch($amount)"
+    //% group="Control"
     export function changePitch(amount: number) {
-        controls.pitch = Math.min(Math.max(controls.pitch + amount, -45), 45);
+        state.pitch = Math.min(Math.max(state.pitch + amount, -45), 45);
     }
 
-    //% block
+    //% block="changeRoll($amount)"
+    //% group="Control"
     export function changeRoll(amount: number) {
-        controls.roll = Math.min(Math.max(controls.roll + amount, -45), 45);
+        state.roll = Math.min(Math.max(state.roll + amount, -45), 45);
     }
 
-    //% block
+    //% block="changeYaw($amount)"
+    //% group="Control"
     export function changeYaw(amount: number) {
-        controls.roll += amount;
+        state.roll += amount;
     }
 
-    //% block
+    //% block="arm()"
+    //% group="Control"
     export function arm() {
-        radio.sendString('a');
+        state.send_arm = true
     }
 
-    //% block
+    //% block="disarm()"
+    //% group="Control"
     export function disarm() {
-        radio.sendString('d');
+        state.send_disarm = true;
     }
 
-    //% block
+    //% block="sendControls()"
+    //% group="Communication"
     export function sendControls() {
-        if (estop) return;
+        if (state.send_estop) {
+            radio.sendValue('e', 1);
+            state.send_estop = false;
+        }
+        
+        if (state.send_arm) {
+            radio.sendValue('a', 1);
+            state.send_arm = false;
+        }
 
-        radio.sendValue('t', controls.throttle);
-        radio.sendValue('p', controls.pitch);
-        radio.sendValue('r', controls.roll);
-        radio.sendValue('y', controls.yaw);
+        if (state.send_disarm) {
+            radio.sendValue('d', 1);
+        }
+
+        radio.sendValue('p', state.pitch);
+        radio.sendValue('r', state.roll);
+        radio.sendValue('t', state.throttle);
+        radio.sendValue('y', state.yaw);
     }
 }
