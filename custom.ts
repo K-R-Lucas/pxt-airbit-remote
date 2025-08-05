@@ -6,6 +6,8 @@ class State {
     send_arm: boolean = false;
     send_disarm: boolean = false;
     send_estop: boolean = false;
+
+    constructor() {}
 }
 
 //% color="#deae10" weight=100
