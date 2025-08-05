@@ -14,9 +14,9 @@ class State {
 namespace AirBitRemote {
     let state: State;
 
-    //% block="initialise()"
+    //% block="init()"
     //% group="Setup"
-    export function initialise() {
+    export function init() {
         state = new State();
     }
 
