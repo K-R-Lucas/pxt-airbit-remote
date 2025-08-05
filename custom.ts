@@ -13,11 +13,13 @@ class State {
 //% color="#deae10" weight=100
 namespace AirBitRemote {
     let state: State;
+    let last: State;
 
     //% block="init()"
     //% group="Setup"
     export function init() {
         state = new State();
+        last = new State();
     }
 
     //% block="setWifiChannel($channel)"
@@ -107,11 +109,28 @@ namespace AirBitRemote {
 
         if (state.send_disarm) {
             radio.sendValue('d', 1);
+            state.send_disarm = false;
         }
 
-        radio.sendValue('p', state.pitch);
-        radio.sendValue('r', state.roll);
-        radio.sendValue('t', state.throttle);
-        radio.sendValue('y', state.yaw);
+        if (last.pitch != state.pitch) {
+            radio.sendValue('p', state.pitch);
+        }
+
+        if (last.roll != state.roll) {
+            radio.sendValue('r', state.roll);
+        }
+
+        if (last.throttle != state.throttle) {
+            radio.sendValue('t', state.throttle);
+        }
+
+        if (last.yaw != state.yaw) {
+            radio.sendValue('y', state.yaw);
+        }
+
+        last.throttle = state.throttle;
+        last.pitch = state.pitch;
+        last.roll = state.roll;
+        last.yaw = state.yaw;
     }
 }
